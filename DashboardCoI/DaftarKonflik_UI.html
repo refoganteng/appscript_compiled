@@ -1,0 +1,222 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Daftar Konflik Kepentingan
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Pemetaan hubungan antara pihak eksternal/internal dengan pegawai BPS.
+      </p>
+    </div>
+    <div class="mt-4 flex flex-wrap items-center gap-3 md:mt-0 md:ml-4">
+      <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">
+        <svg class="-ml-1 mr-2 h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Cetak / PDF
+      </button>
+      <select id="konflikYear" onchange="fetchKonflik()" class="block w-32 pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md shadow-sm">
+        <!-- Years loaded here -->
+      </select>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="flex border-b border-slate-200 bg-white rounded-t-xl overflow-hidden mb-[-1px] print:hidden">
+    <button onclick="switchKonflikTab('mitra')" id="tabKonflikMitra" 
+      class="flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600">
+      <div class="flex items-center justify-center">
+        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        Pihak Mitra Statistik
+      </div>
+    </button>
+    <button onclick="switchKonflikTab('pegawai')" id="tabKonflikPegawai" 
+      class="flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50">
+      <div class="flex items-center justify-center">
+        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        Pihak Sesama Pegawai
+      </div>
+    </button>
+  </div>
+
+  <section class="bg-white shadow-sm border border-slate-200 rounded-b-xl overflow-hidden print:border-none print:shadow-none">
+    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
+      <div class="relative w-full sm:w-72">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </span>
+        <input type="text" id="searchKonflik" onkeyup="renderKonflik()" placeholder="Cari nama pihak terkait..." 
+          class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-cyan-500 focus:border-cyan-500 transition-all">
+      </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loadingKonflik" class="py-12 flex justify-center hidden">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-500"></div>
+    </div>
+
+    <!-- Data List -->
+    <div id="konflikContent" class="divide-y divide-slate-200">
+      <!-- Data will be rendered here -->
+    </div>
+  </section>
+</div>
+
+<script>
+  let konflikData = [];
+  let currentKonflikTab = 'mitra';
+
+  function loadKonflikPage() {
+    const yearSelect = document.getElementById('konflikYear');
+    if (yearSelect.options.length === 0) {
+      google.script.run
+        .withSuccessHandler((years) => {
+          years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.text = y;
+            yearSelect.add(opt);
+          });
+          
+          const currentYear = new Date().getFullYear().toString();
+          if (years.includes(currentYear)) {
+            yearSelect.value = currentYear;
+          } else if (years.length > 0) {
+            yearSelect.value = years[0];
+          }
+          fetchKonflik();
+        })
+        .withFailureHandler(err => alert('Gagal memuat tahun: ' + err.message))
+        .getAvailableYears();
+    } else {
+      fetchKonflik();
+    }
+  }
+
+  function fetchKonflik() {
+    const tahun = document.getElementById('konflikYear').value;
+    if (!tahun) return;
+
+    document.getElementById('loadingKonflik').classList.remove('hidden');
+    document.getElementById('konflikContent').classList.add('hidden');
+
+    google.script.run
+      .withSuccessHandler((data) => {
+        konflikData = data.filter(log => log.namaMitra !== 'TIDAK ADA POTENSI COI');
+        document.getElementById('loadingKonflik').classList.add('hidden');
+        document.getElementById('konflikContent').classList.remove('hidden');
+        renderKonflik();
+      })
+      .withFailureHandler(err => {
+        alert('Gagal memuat data: ' + err.message);
+        document.getElementById('loadingKonflik').classList.add('hidden');
+      })
+      .getCoILogs(tahun);
+  }
+
+  function switchKonflikTab(tab) {
+    currentKonflikTab = tab;
+    const btnMitra = document.getElementById('tabKonflikMitra');
+    const btnPegawai = document.getElementById('tabKonflikPegawai');
+    
+    if (tab === 'mitra') {
+      btnMitra.className = 'flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnPegawai.className = 'flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+    } else {
+      btnPegawai.className = 'flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnMitra.className = 'flex-1 py-4 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+    }
+    
+    document.getElementById('searchKonflik').value = '';
+    renderKonflik();
+  }
+
+  function renderKonflik() {
+    const container = document.getElementById('konflikContent');
+    const search = document.getElementById('searchKonflik').value.toLowerCase();
+    
+    // Filter by tab
+    let filteredData = konflikData.filter(log => {
+      if (currentKonflikTab === 'mitra') {
+        return log.kategori !== 'Sesama Pegawai' && log.posisiMitra !== 'Pegawai Organik';
+      } else {
+        return log.kategori === 'Sesama Pegawai' || log.posisiMitra === 'Pegawai Organik';
+      }
+    });
+
+    // Group by Target (Nama Mitra)
+    const grouped = {};
+    filteredData.forEach(log => {
+      if (!grouped[log.namaMitra]) {
+        grouped[log.namaMitra] = {
+          nama: log.namaMitra,
+          posisi: log.posisiMitra,
+          kategori: log.kategori,
+          reporters: []
+        };
+      }
+      grouped[log.namaMitra].reporters.push(log);
+    });
+
+    // Search
+    let targets = Object.values(grouped);
+    if (search) {
+      targets = targets.filter(t => t.nama.toLowerCase().includes(search));
+    }
+
+    // Sort alphabetically
+    targets.sort((a, b) => a.nama.localeCompare(b.nama));
+
+    if (targets.length === 0) {
+      container.innerHTML = '<div class="py-12 text-center text-slate-500 italic">Tidak ada konflik yang ditemukan.</div>';
+      return;
+    }
+
+    container.innerHTML = targets.map(target => {
+      const reporterRows = target.reporters.map(rep => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-4 text-sm font-medium text-slate-900 border-b border-slate-100">${rep.namaPelapor}</td>
+          <td class="py-3 px-4 text-sm text-slate-500 font-mono border-b border-slate-100">${rep.nipPelapor}</td>
+          <td class="py-3 px-4 text-sm text-slate-600 border-b border-slate-100">
+            <span class="font-medium">${rep.hubungan}</span>
+            ${rep.keterangan ? `<div class="text-xs text-slate-400 italic mt-0.5">"${rep.keterangan}"</div>` : ''}
+          </td>
+        </tr>
+      `).join('');
+
+      const badgeColor = currentKonflikTab === 'mitra' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+      const labelBadge = currentKonflikTab === 'mitra' ? 'Mitra Statistik' : 'Pegawai Organik';
+
+      return `
+        <div class="p-6 break-inside-avoid">
+          <div class="mb-4">
+            <div class="flex items-center space-x-3 mb-1">
+              <h4 class="text-lg font-bold text-slate-900">${target.nama}</h4>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${badgeColor}">
+                ${labelBadge}
+              </span>
+            </div>
+            ${target.posisi && target.posisi !== '-' && target.posisi !== 'Pegawai Organik' ? `<p class="text-sm text-slate-500">${target.posisi}</p>` : ''}
+          </div>
+          
+          <div class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+            <table class="min-w-full">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="py-2.5 px-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-1/3">Pegawai Yang Melaporkan</th>
+                  <th class="py-2.5 px-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-1/4">NIP</th>
+                  <th class="py-2.5 px-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Detail Hubungan</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${reporterRows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  loadKonflikPage();
+</script>

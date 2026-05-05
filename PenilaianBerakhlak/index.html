@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aplikasi penilaian peer-to-peer implementasi nilai BerAKHLAK dan Budaya Kerja BPS Kabupaten Kepahiang.">
+  <title>Penilaian BerAKHLAK BPS Kepahiang</title>
+  <?!= include('style.css') ?>
+</head>
+<body>
+
+<!-- ── App Header ───────────────────────────────────────── -->
+<header id="app-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="avatar" style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      </div>
+      <div>
+        <div class="header-brand-text">BerAKHLAK</div>
+        <div class="header-brand-sub">BPS Kab. Kepahiang</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="avatar" id="header-avatar" title="Profil">—</div>
+      <span id="header-nama" style="font-size:.8125rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button id="theme-toggle" onclick="toggleTheme()" title="Ganti Tema">🌙</button>
+      <button class="btn btn-ghost btn-sm" onclick="handleLogout()">Keluar</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Toast Container ──────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE: LOGIN                                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="page-login" class="page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+      </div>
+      <h1>Penilaian BerAKHLAK</h1>
+      <p>BPS Kabupaten Kepahiang</p>
+    </div>
+
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label" for="input-username">Username</label>
+        <input class="form-input" type="text" id="input-username"
+               placeholder="Masukkan username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-nip">NIP (Password)</label>
+        <input class="form-input" type="password" id="input-nip"
+               placeholder="Masukkan NIP" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" id="btn-login" type="submit">
+        Masuk
+      </button>
+    </form>
+
+    <div class="login-footer">
+      BPS Kabupaten Kepahiang &copy; <?= new Date().getFullYear() ?><br>
+      Sistem Penilaian Implementasi BerAKHLAK
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE: BERANDA                                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="page-beranda" class="page">
+  <div id="beranda-loading" class="loading-overlay-beranda">
+    <div class="spinner" style="width:3rem;height:3rem"></div>
+    <p style="margin-top:1rem;color:var(--color-text-muted)">Menyiapkan Beranda...</p>
+  </div>
+
+  <div id="beranda-content" class="container" style="opacity:0;transition:opacity .3s ease">
+
+    <!-- Hero -->
+    <div class="beranda-hero">
+      <div class="avatar avatar-lg" id="beranda-avatar">?</div>
+      <div class="beranda-hero-text">
+        <h2>Selamat Datang, <span id="beranda-nama">—</span>!</h2>
+        <p>Periode Penilaian: <strong id="beranda-periode">—</strong></p>
+      </div>
+    </div>
+
+    <!-- Status Submit -->
+    <div class="status-card belum" id="status-card">
+      <h3>⏳ Memeriksa status...</h3>
+      <p>Sedang memuat informasi penilaian bulan ini</p>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="beranda-grid">
+      <div class="menu-card" onclick="initPenilaian()" id="btn-mulai-penilaian-wrap">
+        <div class="menu-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        </div>
+        <div>
+          <div class="menu-card-title">Mulai Penilaian</div>
+          <div class="menu-card-desc">Berikan nilai untuk seluruh rekan kerja</div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-mulai-penilaian">🏆 Mulai Penilaian</button>
+      </div>
+
+      <div class="menu-card" onclick="initRekap()">
+        <div class="menu-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="menu-card-title">Rekap Saya</div>
+          <div class="menu-card-desc">Lihat nilai yang Anda terima dari rekan</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">Lihat Rekap →</button>
+      </div>
+
+      <div class="menu-card admin" id="menu-monitoring" onclick="initMonitoring()" style="display:none">
+        <div class="menu-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="menu-card-title">Monitoring Admin</div>
+          <div class="menu-card-desc">Pantau progres pengisian seluruh pegawai</div>
+        </div>
+        <button class="btn btn-sm" style="background:var(--color-accent);color:#fff">Monitoring →</button>
+      </div>
+    </div>
+
+    <!-- Info BerAKHLAK -->
+    <div class="card" style="margin-top:2rem">
+      <div class="card-header" style="display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--color-border);padding-bottom:.75rem;margin-bottom:1rem">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <h3 style="font-size:1.1rem;margin:0">Apa itu BerAKHLAK?</h3>
+      </div>
+      <p style="margin-bottom:1rem;font-size:.875rem">BerAKHLAK merupakan nilai-nilai dasar ASN sebagai panduan perilaku dalam memberikan pelayanan terbaik.</p>
+      <div class="akhlak-grid">
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#1a56db">B</div>
+          <div><div class="akhlak-label">Berorientasi Pelayanan</div><div class="akhlak-desc">Memahami & memenuhi kebutuhan masyarakat</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#057a55">A</div>
+          <div><div class="akhlak-label">Akuntabel</div><div class="akhlak-desc">Bertanggung jawab atas kepercayaan yang diberikan</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#c27803">K</div>
+          <div><div class="akhlak-label">Kompeten</div><div class="akhlak-desc">Terus belajar & mengembangkan kapabilitas</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#7e3af2">H</div>
+          <div><div class="akhlak-label">Harmonis</div><div class="akhlak-desc">Saling peduli & menghargai perbedaan</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#d61f69">L</div>
+          <div><div class="akhlak-label">Loyal</div><div class="akhlak-desc">Berdedikasi & mengutamakan kepentingan bangsa</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#0694a2">A</div>
+          <div><div class="akhlak-label">Adaptif</div><div class="akhlak-desc">Terus berinovasi & antusias menghadapi perubahan</div></div>
+        </div>
+        <div class="akhlak-item">
+          <div class="akhlak-letter" style="background:#e3a008">K</div>
+          <div><div class="akhlak-label">Kolaboratif</div><div class="akhlak-desc">Membangun kerja sama yang sinergis</div></div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE: PENILAIAN                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="page-penilaian" class="page">
+
+  <!-- Sticky Progress Header -->
+  <div class="penilaian-header container">
+    <button class="btn btn-ghost btn-sm" onclick="goBack()">← Kembali</button>
+    <h2>Form Penilaian</h2>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.375rem">
+        <span id="progress-label" class="progress-label">0 dari 0 pegawai dinilai</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <p style="margin-bottom:1rem;font-size:.875rem">
+      Berikan <strong>1 nilai holistik (1–5)</strong> untuk setiap rekan, mencerminkan keseluruhan implementasi BerAKHLAK &amp; Budaya Kerja BPS.
+    </p>
+
+    <!-- Daftar Pegawai -->
+    <div id="penilaian-list">
+      <div class="loading-center"><div class="spinner"></div><p>Memuat...</p></div>
+    </div>
+
+    <!-- Submit Section (Inside Container) -->
+    <div class="submit-section" style="margin-top:2rem;padding-bottom:3rem">
+      <div style="font-size:.875rem;color:var(--color-text-muted);margin-bottom:1rem;text-align:center">
+        Semua rekan harus diberi nilai sebelum submit.
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" id="btn-submit-penilaian"
+              onclick="openSubmitModal()" disabled>
+        Submit Penilaian
+      </button>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- Modal Konfirmasi Submit -->
+<div class="modal-overlay" id="modal-konfirmasi">
+  <div class="modal">
+    <div class="modal-title">⚠️ Konfirmasi Submit Penilaian</div>
+    <div class="modal-body">
+      Anda akan menyimpan penilaian untuk seluruh rekan pada periode ini.<br><br>
+      <strong>Penilaian tidak dapat diubah setelah disubmit.</strong><br>
+      Apakah Anda yakin?
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-konfirmasi')">Batal</button>
+      <button class="btn btn-primary" onclick="handleSubmitPenilaian()">Ya, Submit Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE: REKAP SAYA                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="page-rekap" class="page">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()">← Kembali</button>
+        <h2>Rekap Nilai Saya</h2>
+      </div>
+      <div class="monitoring-controls" style="margin:0">
+        <select id="rekap-select-periode" onchange="initRekap(this.value)" style="max-width:180px">
+          <option>Memuat...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Score Card -->
+    <div class="rekap-score">
+      <div id="rekap-periode" style="font-size:.875rem;opacity:.8;margin-bottom:.5rem">—</div>
+      <div class="score-num" id="rekap-score-num">—</div>
+      <div class="score-stars" id="rekap-score-stars"></div>
+      <div class="score-label" id="rekap-score-label"></div>
+      <div class="score-sub" id="rekap-jumlah-penilai"></div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="rekap-info-grid">
+      <div class="card rekap-info-card">
+        <div class="rekap-info-label">📊 Skala Penilaian</div>
+        <div class="rekap-skala-list">
+          <div class="rekap-skala-item">
+            <span class="rekap-skala-stars">★★★★★</span>
+            <div class="rekap-skala-right">
+              <span class="rekap-skala-num">5</span>
+              <span class="badge badge-success">Sangat Baik</span>
+            </div>
+          </div>
+          <div class="rekap-skala-item">
+            <span class="rekap-skala-stars">★★★★☆</span>
+            <div class="rekap-skala-right">
+              <span class="rekap-skala-num">4</span>
+              <span class="badge badge-primary">Baik</span>
+            </div>
+          </div>
+          <div class="rekap-skala-item">
+            <span class="rekap-skala-stars">★★★☆☆</span>
+            <div class="rekap-skala-right">
+              <span class="rekap-skala-num">3</span>
+              <span class="badge badge-warning">Cukup</span>
+            </div>
+          </div>
+          <div class="rekap-skala-item">
+            <span class="rekap-skala-stars">★★☆☆☆</span>
+            <div class="rekap-skala-right">
+              <span class="rekap-skala-num">2</span>
+              <span class="badge badge-danger">Kurang</span>
+            </div>
+          </div>
+          <div class="rekap-skala-item">
+            <span class="rekap-skala-stars">★☆☆☆☆</span>
+            <div class="rekap-skala-right">
+              <span class="rekap-skala-num">1</span>
+              <span class="badge badge-danger">Sangat Kurang</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card rekap-info-card">
+        <div class="rekap-info-label">ℹ️ Keterangan</div>
+        <p style="margin-top:.75rem;font-size:.875rem;line-height:1.7">
+          Nilai yang ditampilkan adalah <strong>rata-rata holistik</strong> dari seluruh rekan yang telah memberikan penilaian pada periode yang dipilih.
+        </p>
+        <div class="rekap-note">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Gunakan filter periode di atas untuk melihat riwayat bulan sebelumnya.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE: MONITORING (ADMIN)                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="page-monitoring" class="page">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+      <button class="btn btn-ghost btn-sm" onclick="goBack()">← Kembali</button>
+      <h2>📊 Monitoring Admin</h2>
+    </div>
+
+    <!-- Controls -->
+    <div class="monitoring-controls">
+      <select id="select-periode" onchange="onPeriodeChange()">
+        <option>Memuat...</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="onPeriodeChange()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <div class="card summary-card">
+        <div class="s-num primary" id="sum-total">—</div>
+        <div class="s-label">Total Pegawai</div>
+      </div>
+      <div class="card summary-card">
+        <div class="s-num success" id="sum-sudah">—</div>
+        <div class="s-label">Sudah Submit</div>
+      </div>
+      <div class="card summary-card">
+        <div class="s-num danger" id="sum-belum">—</div>
+        <div class="s-label">Belum Submit</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card" style="margin-bottom:1.25rem;padding:1.25rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+        <span style="font-size:.875rem;font-weight:600">Progres Pengisian</span>
+        <span style="font-size:.875rem;color:var(--color-text-muted)" id="sum-persen">—</span>
+      </div>
+      <div class="progress-bar-wrap" style="height:12px">
+        <div class="progress-bar-fill" id="monitoring-progress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mon-tabs">
+      <button class="mon-tab active" id="tab-btn-status" onclick="switchMonTab('status')">📋 Status Submit</button>
+      <button class="mon-tab" id="tab-btn-rekap" onclick="switchMonTab('rekap')">🏆 Rekap Ranking</button>
+    </div>
+
+    <!-- Tab: Status Submit -->
+    <div id="tab-status">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="monitoring-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th onclick="sortMonitoring('nama')" title="Urutkan">Nama ↕</th>
+                <th onclick="sortMonitoring('nip')" title="Urutkan">NIP ↕</th>
+                <th onclick="sortMonitoring('sudahSubmit')" title="Urutkan">Status ↕</th>
+                <th>Timestamp &amp; Detail</th>
+              </tr>
+            </thead>
+            <tbody id="monitoring-tbody">
+              <tr><td colspan="5" style="padding:2rem;text-align:center">
+                <div class="spinner"></div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Rekap Ranking -->
+    <div id="tab-rekap" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+        <button class="btn btn-sm" style="background:#057a55;color:#fff;gap:.5rem;padding:.5rem 1rem" onclick="handleExportRekap()" id="btn-export-rekap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+          Export ke Spreadsheet
+        </button>
+      </div>
+      <!-- Podium Top 3 -->
+      <div class="podium-wrap" id="podium-wrap"></div>
+
+      <!-- Tabel Ranking Lengkap -->
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1.25rem">
+        <div class="monitoring-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:center;width:60px">Rank</th>
+                <th>Nama Pegawai</th>
+                <th style="text-align:center">Rata-rata</th>
+                <th style="text-align:center">Bintang</th>
+                <th style="text-align:center">Penilai</th>
+                <th style="text-align:center">Kategori</th>
+              </tr>
+            </thead>
+            <tbody id="rekap-tbody">
+              <tr><td colspan="6" style="padding:2rem;text-align:center">
+                <div class="spinner"></div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<?!= include('script.js') ?>
+</body>
+</html>

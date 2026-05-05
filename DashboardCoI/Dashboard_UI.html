@@ -1,0 +1,230 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Ringkasan Identifikasi CoI
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Status pelaporan potensi Conflict of Interest BPS Kabupaten Kepahiang.
+      </p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <select id="dashYear" onchange="loadDashboard()" class="block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md shadow-sm bg-white">
+        <!-- Years loaded here -->
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Section -->
+  <div class="space-y-6 mb-8">
+    <!-- Row 1: Basic Stats -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 flex items-center space-x-4">
+        <div class="bg-cyan-100 p-3 rounded-lg text-cyan-700">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Organik</p>
+          <p class="text-2xl font-bold text-slate-900" id="stat-total-organik">-</p>
+        </div>
+      </div>
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 flex items-center space-x-4">
+        <div class="bg-amber-100 p-3 rounded-lg text-amber-700">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Mitra</p>
+          <p class="text-2xl font-bold text-slate-900" id="stat-total-mitra">-</p>
+        </div>
+      </div>
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 flex items-center space-x-4">
+        <div class="bg-indigo-100 p-3 rounded-lg text-indigo-700">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Laporan</p>
+          <div class="flex items-baseline space-x-2">
+            <p class="text-2xl font-bold text-slate-900" id="stat-total-reports">-</p>
+            <div class="flex flex-col text-[10px] leading-tight text-slate-400">
+              <span id="stat-detail-mitra">Mitra: -</span>
+              <span id="stat-detail-pegawai">Pegawai: -</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Row 2: Status KPIs -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 border-t-4 border-t-red-500">
+        <p class="text-[11px] font-semibold text-red-600 uppercase tracking-wider mb-1">Ada Potensi (Mitra)</p>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-3xl font-bold text-slate-900" id="stat-ada-potensi-mitra">-</p>
+          <p class="text-sm text-slate-500">Pegawai</p>
+        </div>
+      </div>
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 border-t-4 border-t-orange-500">
+        <p class="text-[11px] font-semibold text-orange-600 uppercase tracking-wider mb-1">Ada Potensi (Pegawai)</p>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-3xl font-bold text-slate-900" id="stat-ada-potensi-pegawai">-</p>
+          <p class="text-sm text-slate-500">Pegawai</p>
+        </div>
+      </div>
+
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 border-t-4 border-t-green-500">
+        <p class="text-xs font-semibold text-green-600 uppercase tracking-wider mb-1">Bebas CoI (Nihil)</p>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-3xl font-bold text-slate-900" id="stat-nihil">-</p>
+          <p class="text-sm text-slate-500">Pegawai</p>
+        </div>
+      </div>
+      <div class="bg-white overflow-hidden shadow-sm border border-slate-200 rounded-xl p-5 border-t-4 border-t-slate-400">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Belum Lapor</p>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-3xl font-bold text-slate-900" id="stat-belum-lapor">-</p>
+          <p class="text-sm text-slate-500">Pegawai</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <section class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 gap-4">
+      <h3 class="text-lg font-semibold text-slate-900">Status Identifikasi per Pegawai</h3>
+      <div class="relative w-full sm:w-64">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </span>
+        <input type="text" id="searchOrganik" onkeyup="filterDashTable()" placeholder="Cari nama..." 
+          class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-cyan-500 focus:border-cyan-500 transition-all">
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200" id="dashTable">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama Pegawai</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">NIP</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Mitra Statistik</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Sesama Pegawai</th>
+          </tr>
+
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200" id="dashTableBody">
+          <!-- Rows loaded here -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+  let dashData = [];
+
+  function loadDashboard() {
+    const yearSelect = document.getElementById('dashYear');
+    if (yearSelect.options.length === 0) {
+      google.script.run
+        .withSuccessHandler((years) => {
+          years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.text = y;
+            yearSelect.add(opt);
+          });
+          
+          const currentYear = new Date().getFullYear().toString();
+          if (years.includes(currentYear)) {
+            yearSelect.value = currentYear;
+          } else if (years.length > 0) {
+            yearSelect.value = years[0];
+          }
+          fetchDashboardStats();
+        })
+        .withFailureHandler(err => alert('Gagal memuat tahun: ' + err.message))
+        .getAvailableYears();
+    } else {
+      fetchDashboardStats();
+    }
+  }
+
+  function fetchDashboardStats() {
+    const tahun = document.getElementById('dashYear').value;
+    if (!tahun) return;
+
+    google.script.run
+      .withSuccessHandler((stats) => {
+        dashData = stats.organikWithStatus;
+        updateStats(stats);
+        renderDashTable(dashData);
+      })
+      .withFailureHandler(err => alert('Gagal memuat statistik: ' + err.message))
+      .getDashboardStats(tahun);
+  }
+
+  function updateStats(stats) {
+    document.getElementById('stat-total-organik').innerText = stats.totalOrganik;
+    document.getElementById('stat-total-mitra').innerText = stats.totalMitra;
+    document.getElementById('stat-total-reports').innerText = stats.totalReports;
+    document.getElementById('stat-detail-mitra').innerText = 'Mitra: ' + stats.totalCoiMitra;
+    document.getElementById('stat-detail-pegawai').innerText = 'Pegawai: ' + stats.totalCoiPegawai;
+    document.getElementById('stat-ada-potensi-mitra').innerText = stats.totalAdaPotensiMitra;
+    document.getElementById('stat-ada-potensi-pegawai').innerText = stats.totalAdaPotensiPegawai;
+    document.getElementById('stat-nihil').innerText = stats.totalNihil;
+    document.getElementById('stat-belum-lapor').innerText = stats.totalBelumIdentifikasi;
+
+  }
+
+
+  function getBadge(lapor, potensi) {
+    if (potensi) return { c: 'bg-red-100 text-red-700 border border-red-200', t: '⚠️ Ada Potensi' };
+    if (lapor) return { c: 'bg-green-100 text-green-700 border border-green-200', t: '✅ Nihil' };
+    return { c: 'bg-slate-100 text-slate-500 border border-slate-200', t: '❌ Belum' };
+  }
+
+  function renderDashTable(data) {
+    const tbody = document.getElementById('dashTableBody');
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">Data tidak ditemukan</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(o => {
+      const bMitra = getBadge(o.lMitra, o.cMitra);
+      const bPeg = getBadge(o.lPegawai, o.cPegawai);
+
+      return `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-slate-900">${o.nama}</div>
+            <div class="text-[11px] text-slate-500 tracking-tight">${o.email}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">
+            ${o.nip}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${bMitra.c}">
+              ${bMitra.t}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${bPeg.c}">
+              ${bPeg.t}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+
+  function filterDashTable() {
+    const q = document.getElementById('searchOrganik').value.toLowerCase();
+    const filtered = dashData.filter(o => o.nama.toLowerCase().includes(q) || o.nip.toString().includes(q));
+    renderDashTable(filtered);
+  }
+
+  loadDashboard();
+</script>

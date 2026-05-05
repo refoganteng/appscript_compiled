@@ -1,0 +1,115 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Daftar Mitra Statistik
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Database mitra statistik per tahun kegiatan.
+      </p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <select id="mitraYear" onchange="fetchMitra()" class="block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md shadow-sm">
+        <!-- Years loaded here -->
+      </select>
+    </div>
+  </div>
+
+  <section class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+      <h3 class="text-lg font-semibold text-slate-900">Data Mitra</h3>
+      <input type="text" id="searchMitraList" onkeyup="filterMitraList()" placeholder="Cari nama atau posisi..." 
+        class="block w-64 px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-cyan-500 focus:border-cyan-500">
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200" id="mitraTable">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-16 text-center">Tahun</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama Lengkap</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Posisi</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Alamat Detail</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200" id="mitraTableBody">
+          <!-- Rows loaded here -->
+        </tbody>
+      </table>
+    </div>
+    <div id="loadingMitra" class="py-12 flex flex-col items-center justify-center space-y-4">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600"></div>
+      <p class="text-slate-500 text-sm">Memuat data mitra...</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  let allMitraData = [];
+
+  function loadMitraPage() {
+    const yearSelect = document.getElementById('mitraYear');
+    if (yearSelect.options.length === 0) {
+      google.script.run
+        .withSuccessHandler((years) => {
+          years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.text = y;
+            yearSelect.add(opt);
+          });
+          yearSelect.value = new Date().getFullYear();
+          fetchMitra();
+        })
+        .getAvailableYears();
+    } else {
+      fetchMitra();
+    }
+  }
+
+  function fetchMitra() {
+    const tahun = document.getElementById('mitraYear').value;
+    document.getElementById('loadingMitra').classList.remove('hidden');
+    document.getElementById('mitraTableBody').innerHTML = '';
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        allMitraData = data;
+        renderMitraTable(data);
+        document.getElementById('loadingMitra').classList.add('hidden');
+      })
+      .getMitraByTahun(tahun);
+  }
+
+  function renderMitraTable(data) {
+    const tbody = document.getElementById('mitraTableBody');
+    tbody.innerHTML = data.map(m => `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-500 font-medium">
+          ${m.tahun}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-slate-900">${m.nama}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+            ${m.posisi}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm text-slate-500 max-w-xs truncate">
+          ${m.alamat}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterMitraList() {
+    const q = document.getElementById('searchMitraList').value.toLowerCase();
+    const filtered = allMitraData.filter(m => 
+      m.nama.toLowerCase().includes(q) || 
+      m.posisi.toLowerCase().includes(q)
+    );
+    renderMitraTable(filtered);
+  }
+
+  loadMitraPage();
+</script>

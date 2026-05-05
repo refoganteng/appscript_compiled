@@ -1,0 +1,233 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Daftar Potensi Conflict of Interest
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Rekapitulasi seluruh deklarasi CoI pegawai organik BPS Kabupaten Kepahiang.
+      </p>
+    </div>
+    <div class="mt-4 flex flex-wrap items-center gap-3 md:mt-0 md:ml-4">
+      <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">
+        <svg class="-ml-1 mr-2 h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Cetak / PDF
+      </button>
+      <select id="rekapYear" onchange="fetchRekap()" class="block w-32 pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md shadow-sm">
+        <!-- Years loaded here -->
+      </select>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="flex border-b border-slate-200 bg-white rounded-t-xl overflow-hidden mb-[-1px] print:hidden">
+    <button onclick="switchRekapTab('mitra')" id="tab-rekap-mitra" 
+      class="flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600">
+      Laporan Mitra Statistik
+    </button>
+    <button onclick="switchRekapTab('pegawai')" id="tab-rekap-pegawai" 
+      class="flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50">
+      Laporan Sesama Pegawai
+    </button>
+  </div>
+
+
+  <section class="bg-white shadow-sm border border-slate-200 rounded-b-xl overflow-hidden print:shadow-none print:border-none print:rounded-none">
+    <div class="px-6 py-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 print:bg-white">
+      <h3 id="rekapTitle" class="text-lg font-semibold text-slate-900">Rekapitulasi Laporan Mitra</h3>
+
+      <input type="text" id="searchRekap" onkeyup="filterRekap()" placeholder="Cari pelapor, mitra, atau hubungan..." 
+        class="block w-64 px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-cyan-500 focus:border-cyan-500">
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200" id="rekapTable">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pelapor (Organik)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pihak Terkait</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Hubungan</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Keterangan</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Waktu Lapor</th>
+
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200" id="rekapTableBody">
+          <!-- Rows loaded here -->
+        </tbody>
+      </table>
+    </div>
+    <div id="loadingRekap" class="py-12 flex flex-col items-center justify-center space-y-4">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600"></div>
+      <p class="text-slate-500 text-sm">Memuat data rekap CoI...</p>
+    </div>
+    <div id="emptyRekap" class="hidden py-12 text-center">
+      <p class="text-slate-400 text-sm italic">Tidak ada data laporan untuk tahun yang dipilih.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  let activeRekapTab = 'mitra';
+  let allRekapData = [];
+
+  function switchRekapTab(tab) {
+    activeRekapTab = tab;
+    const btnMitra = document.getElementById('tab-rekap-mitra');
+    const btnPegawai = document.getElementById('tab-rekap-pegawai');
+    const title = document.getElementById('rekapTitle');
+    
+    if (tab === 'mitra') {
+      btnMitra.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnPegawai.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+      title.textContent = 'Rekapitulasi Laporan Mitra';
+    } else {
+      btnPegawai.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnMitra.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+      title.textContent = 'Rekapitulasi Laporan Sesama Pegawai';
+    }
+    
+    renderRekapTable(allRekapData);
+  }
+
+
+  function loadRekapPage() {
+    const yearSelect = document.getElementById('rekapYear');
+    if (yearSelect.options.length === 0) {
+      google.script.run
+        .withSuccessHandler((years) => {
+          years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.text = y;
+            yearSelect.add(opt);
+          });
+          
+          const currentYear = new Date().getFullYear().toString();
+          if (years.includes(currentYear)) {
+            yearSelect.value = currentYear;
+          } else if (years.length > 0) {
+            yearSelect.value = years[0];
+          }
+          fetchRekap();
+        })
+        .withFailureHandler((err) => {
+          console.error(err);
+          document.getElementById('loadingRekap').classList.add('hidden');
+          alert('Gagal memuat daftar tahun: ' + err.message);
+        })
+        .getAvailableYears();
+    } else {
+      fetchRekap();
+    }
+  }
+
+  function fetchRekap() {
+    const tahun = document.getElementById('rekapYear').value;
+    if (!tahun) return;
+    
+    document.getElementById('loadingRekap').classList.remove('hidden');
+    document.getElementById('emptyRekap').classList.add('hidden');
+    document.getElementById('rekapTableBody').innerHTML = '';
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        allRekapData = data;
+        if (!data || data.length === 0) {
+          document.getElementById('emptyRekap').classList.remove('hidden');
+        } else {
+          renderRekapTable(data);
+        }
+        document.getElementById('loadingRekap').classList.add('hidden');
+      })
+      .withFailureHandler((err) => {
+        console.error(err);
+        document.getElementById('loadingRekap').classList.add('hidden');
+        alert('Gagal memuat rekap: ' + err.message);
+      })
+      .getCoILogs(tahun);
+  }
+
+  function renderRekapTable(data) {
+    const tbody = document.getElementById('rekapTableBody');
+    const empty = document.getElementById('emptyRekap');
+    
+    // FILTER BERDASARKAN TAB
+    let filtered = (data || []).filter(log => {
+      const isPegawai = log.posisiMitra === 'Pegawai Organik';
+      return activeRekapTab === 'pegawai' ? isPegawai : !isPegawai;
+    });
+
+    // FILTER BERDASARKAN SEARCH
+    const q = document.getElementById('searchRekap').value.toLowerCase();
+    if (q) {
+      filtered = filtered.filter(log => 
+        log.namaPelapor.toLowerCase().includes(q) || 
+        log.namaMitra.toLowerCase().includes(q) || 
+        log.hubungan.toLowerCase().includes(q) ||
+        (log.kategori || '').toLowerCase().includes(q)
+      );
+    }
+
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    empty.classList.add('hidden');
+    tbody.innerHTML = filtered.map(log => {
+      const isPegawai = log.posisiMitra === 'Pegawai Organik' || log.kategori === 'Sesama Pegawai';
+      const kategoriText = isPegawai ? 'Sesama Pegawai' : 'Mitra Statistik';
+      const badgeClass = isPegawai ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200';
+
+      return `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-slate-900">${log.namaPelapor}</div>
+          <div class="text-[11px] text-slate-500 font-mono">${log.nipPelapor}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-slate-900">${log.namaMitra}</div>
+          <div class="text-[11px] text-slate-500">${log.posisiMitra}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${badgeClass}">
+            ${kategoriText}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-100">
+            ${log.hubungan}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm text-slate-500 max-w-xs truncate">
+          ${log.keterangan || '-'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-[11px] text-slate-400">
+          ${new Date(log.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+        </td>
+      </tr>
+      `;
+    }).join('');
+
+  }
+
+  function filterRekap() {
+    renderRekapTable(allRekapData);
+  }
+
+
+  loadRekapPage();
+</script>
+
+<style media="print">
+  @page { size: landscape; }
+  .print\:hidden { display: none !important; }
+  body { background: white; }
+  main { max-width: 100% !important; padding: 0 !important; }
+  .fade-in { animation: none !important; }
+</style>

@@ -1,0 +1,498 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Identifikasi Potensi Conflict of Interest
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Laporkan hubungan personal dengan mitra statistik untuk mendukung transparansi.
+      </p>
+    </div>
+    <div class="mt-4 flex items-center space-x-3 md:mt-0 md:ml-4">
+      <select id="filterTahun" onchange="loadPageData()" class="block pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md shadow-sm bg-white">
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <!-- Left: Form (2/3 width) -->
+    <div class="lg:col-span-2 space-y-6">
+      <section class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900">Form Identifikasi Potensi CoI</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Pilih kategori, centang nama yang berhubungan, lalu isi kolom hubungan.</p>
+          </div>
+          <span id="selectedCount" class="text-xs font-medium bg-cyan-100 text-cyan-700 px-2.5 py-1 rounded-full">0 dipilih</span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-slate-200 bg-white">
+          <button onclick="switchTab('mitra')" id="tab-mitra" 
+            class="flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600">
+            <div class="flex items-center justify-center">
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+              Mitra Statistik
+            </div>
+          </button>
+          <button onclick="switchTab('pegawai')" id="tab-pegawai" 
+            class="flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50">
+            <div class="flex items-center justify-center">
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              Sesama Pegawai
+            </div>
+          </button>
+        </div>
+
+
+        <!-- Loading state -->
+        <div id="loadingForm" class="py-12 flex flex-col items-center justify-center space-y-4">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600"></div>
+          <p class="text-slate-500 text-sm">Memuat daftar mitra...</p>
+        </div>
+
+        <!-- Form content -->
+        <div id="formContent" class="hidden">
+          <!-- Search bar -->
+          <div class="px-4 py-3 border-b border-slate-100 bg-white sticky top-0 z-10">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </span>
+              <input type="text" id="searchMitra" oninput="filterMitraList()" placeholder="Cari nama mitra..." 
+                class="block w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-cyan-500 focus:border-cyan-500 text-sm bg-slate-50">
+            </div>
+          </div>
+
+          <!-- Mitra table with inline inputs -->
+          <form id="coiForm" onsubmit="submitReport(event)">
+            <div class="overflow-y-auto" style="max-height: 480px;">
+              <table class="min-w-full">
+                <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                  <tr>
+                    <th class="w-10 px-4 py-3"></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama Mitra</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Posisi</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[140px]">Hubungan *</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[140px]">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="mitraTableBody" class="bg-white divide-y divide-slate-100">
+                  <!-- rows injected here -->
+                </tbody>
+              </table>
+              <div id="emptyMitra" class="hidden py-10 text-center text-slate-400 text-sm italic">Tidak ada mitra ditemukan.</div>
+            </div>
+
+            <!-- Actions footer -->
+            <div class="px-4 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+              <button type="button" onclick="confirmNoCoI()"
+                class="inline-flex items-center px-3 py-2 text-xs font-medium border border-slate-300 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all shadow-sm">
+                <svg class="h-4 w-4 mr-1.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Saya Tidak Ada Potensi CoI
+              </button>
+              <button type="submit" id="submitBtn" disabled
+                class="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-lg shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Simpan Laporan
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right: History (1/3 width) -->
+    <div>
+      <section class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+          <h3 class="text-base font-semibold text-slate-900">Riwayat Laporan Saya</h3>
+        </div>
+        <div class="divide-y divide-slate-100" id="myHistoryList">
+          <!-- items here -->
+        </div>
+        <div id="emptyHistory" class="hidden py-10 text-center px-4">
+          <p class="text-slate-400 text-sm">Belum ada laporan untuk tahun ini.</p>
+        </div>
+        <div id="loadingHistory" class="py-6 flex justify-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-500"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div class="fixed inset-0 bg-slate-700 opacity-60" onclick="closeEditModal()"></div>
+      <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md z-10">
+        <div class="px-6 py-5 border-b border-slate-200">
+          <h3 class="text-base font-bold text-slate-900">Edit Laporan</h3>
+          <p id="editMitraName" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <div class="px-6 py-4 space-y-4">
+          <input type="hidden" id="editLogId">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Hubungan *</label>
+            <input type="text" id="editHubungan" class="block w-full border border-slate-300 rounded-lg py-2 px-3 text-sm focus:ring-cyan-500 focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Keterangan</label>
+            <textarea id="editKeterangan" rows="3" class="block w-full border border-slate-300 rounded-lg py-2 px-3 text-sm focus:ring-cyan-500 focus:border-cyan-500"></textarea>
+          </div>
+        </div>
+        <div class="px-6 py-4 bg-slate-50 flex justify-end space-x-3 rounded-b-xl">
+          <button onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50">Batal</button>
+          <button onclick="submitUpdate()" class="px-4 py-2 text-sm font-semibold rounded-lg bg-cyan-600 text-white hover:bg-cyan-700">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeTab = 'mitra';
+  let allMitra = [];
+  let allPegawai = [];
+  let myHistory = [];
+  let selectedIds = new Set();
+
+  function switchTab(tab) {
+    activeTab = tab;
+    // Update UI Tab
+    const btnMitra = document.getElementById('tab-mitra');
+    const btnPegawai = document.getElementById('tab-pegawai');
+    
+    if (tab === 'mitra') {
+      btnMitra.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnPegawai.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+    } else {
+      btnPegawai.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-cyan-600 text-cyan-600';
+      btnMitra.className = 'flex-1 py-3 text-sm font-semibold border-b-2 transition-all border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50';
+    }
+    
+    selectedIds.clear();
+    updateSelectedCount();
+    document.getElementById('searchMitra').value = '';
+    
+    // Render data yang sesuai
+    renderMitraTable(tab === 'mitra' ? allMitra : allPegawai);
+  }
+
+  function loadPageData() {
+    const yearSelect = document.getElementById('filterTahun');
+    if (yearSelect.options.length === 0) {
+      google.script.run
+        .withSuccessHandler(years => {
+          years.forEach(y => { const o = document.createElement('option'); o.value = y; o.text = y; yearSelect.add(o); });
+          const cur = new Date().getFullYear().toString();
+          yearSelect.value = years.includes(cur) ? cur : (years[0] || cur);
+          fetchData();
+        })
+        .withFailureHandler(err => alert('Gagal memuat tahun: ' + err.message))
+        .getAvailableYears();
+    } else {
+      fetchData();
+    }
+  }
+
+  function fetchData() {
+    const tahun = document.getElementById('filterTahun').value;
+    if (!tahun) return;
+    selectedIds.clear();
+    updateSelectedCount();
+
+    // Load mitra list
+    document.getElementById('loadingForm').classList.remove('hidden');
+    document.getElementById('formContent').classList.add('hidden');
+    
+    // Ambil data Mitra dan Pegawai secara paralel
+    Promise.all([
+      new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .getMitraByTahun(tahun);
+      }),
+      new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .getOrganikEmployees();
+      })
+    ]).then(([mitras, pegawais]) => {
+      allMitra = mitras || [];
+      // Filter out self from pegawais
+      allPegawai = (pegawais || []).filter(p => p.username !== currentUser.username);
+      
+      // Map pegawais to match mitra structure for table rendering
+      allPegawai = allPegawai.map((p, idx) => ({
+        id: 'p' + idx,
+        nama: p.nama,
+        posisi: 'Pegawai Organik',
+        nip: p.nip
+      }));
+
+      renderMitraTable(activeTab === 'mitra' ? allMitra : allPegawai);
+      document.getElementById('loadingForm').classList.add('hidden');
+      document.getElementById('formContent').classList.remove('hidden');
+    }).catch(err => {
+      alert('Gagal memuat data: ' + err.message);
+      document.getElementById('loadingForm').classList.add('hidden');
+    });
+
+    // Load history
+    document.getElementById('myHistoryList').innerHTML = '';
+    document.getElementById('emptyHistory').classList.add('hidden');
+    document.getElementById('loadingHistory').classList.remove('hidden');
+    google.script.run
+      .withSuccessHandler(logs => {
+        document.getElementById('loadingHistory').classList.add('hidden');
+        myHistory = logs || [];
+        renderHistory(myHistory);
+        // Refresh table untuk menyembunyikan yang sudah dilaporkan
+        renderMitraTable(activeTab === 'mitra' ? allMitra : allPegawai);
+      })
+      .withFailureHandler(err => {
+        document.getElementById('loadingHistory').classList.add('hidden');
+        document.getElementById('emptyHistory').classList.remove('hidden');
+        console.error('Gagal muat riwayat:', err.message);
+      })
+      .getMyCoILogs(tahun, currentUser);
+  }
+
+
+
+  function renderMitraTable(data) {
+    const tbody = document.getElementById('mitraTableBody');
+    const empty = document.getElementById('emptyMitra');
+    
+    // FILTER: Jangan tampilkan yang sudah masuk riwayat
+    const reportedNames = new Set(myHistory.map(h => h.namaMitra));
+    const filteredData = data.filter(item => !reportedNames.has(item.nama));
+
+    if (!filteredData || filteredData.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    tbody.innerHTML = filteredData.map(m => {
+      const isChecked = selectedIds.has(m.id);
+      return `
+        <tr id="row-${m.id}" class="transition-colors ${isChecked ? 'bg-cyan-50 border-l-2 border-l-cyan-500' : 'hover:bg-slate-50 border-l-2 border-l-transparent'}">
+          <td class="px-4 py-3 text-center">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRow(this, '${m.id}')"
+              class="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-slate-300 rounded cursor-pointer">
+          </td>
+          <td class="px-4 py-3 cursor-pointer" onclick="clickRow('${m.id}')">
+            <div class="text-sm font-medium text-slate-900">${m.nama}</div>
+          </td>
+
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">${m.posisi}</span>
+          </td>
+          <td class="px-4 py-2">
+            <input type="text" id="hub-${m.id}" ${!isChecked ? 'disabled' : ''} placeholder="mis: Orang tua, Adik..."
+              class="block w-full px-2 py-1.5 text-xs border rounded-md transition-all ${isChecked ? 'border-cyan-300 bg-white focus:ring-cyan-500 focus:border-cyan-500' : 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'}"
+              required>
+          </td>
+          <td class="px-4 py-2">
+            <input type="text" id="ket-${m.id}" ${!isChecked ? 'disabled' : ''} placeholder="Opsional..."
+              class="block w-full px-2 py-1.5 text-xs border rounded-md transition-all ${isChecked ? 'border-slate-300 bg-white focus:ring-cyan-500 focus:border-cyan-500' : 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'}">
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function clickRow(id) {
+    const cb = document.querySelector(`#row-${id} input[type="checkbox"]`);
+    if (cb) { cb.checked = !cb.checked; toggleRow(cb, id); }
+  }
+
+  function toggleRow(cb, id) {
+    const row = document.getElementById('row-' + id);
+    const hubInput = document.getElementById('hub-' + id);
+    const ketInput = document.getElementById('ket-' + id);
+    if (cb.checked) {
+      selectedIds.add(id);
+      row.className = 'transition-colors bg-cyan-50 border-l-2 border-l-cyan-500';
+      hubInput.disabled = false;
+      hubInput.className = 'block w-full px-2 py-1.5 text-xs border border-cyan-300 bg-white rounded-md focus:ring-cyan-500 focus:border-cyan-500';
+      ketInput.disabled = false;
+      ketInput.className = 'block w-full px-2 py-1.5 text-xs border border-slate-300 bg-white rounded-md focus:ring-cyan-500 focus:border-cyan-500';
+      hubInput.focus();
+    } else {
+      selectedIds.delete(id);
+      row.className = 'transition-colors hover:bg-slate-50 border-l-2 border-l-transparent';
+      hubInput.disabled = true;
+      hubInput.value = '';
+      hubInput.className = 'block w-full px-2 py-1.5 text-xs border border-slate-200 bg-slate-50 text-slate-400 rounded-md cursor-not-allowed';
+      ketInput.disabled = true;
+      ketInput.value = '';
+      ketInput.className = 'block w-full px-2 py-1.5 text-xs border border-slate-200 bg-slate-50 text-slate-400 rounded-md cursor-not-allowed';
+    }
+    updateSelectedCount();
+  }
+
+  function updateSelectedCount() {
+    const n = selectedIds.size;
+    document.getElementById('selectedCount').textContent = n + ' dipilih';
+    document.getElementById('submitBtn').disabled = n === 0;
+  }
+
+  function filterMitraList() {
+    const q = document.getElementById('searchMitra').value.toLowerCase();
+    const data = activeTab === 'mitra' ? allMitra : allPegawai;
+    const filtered = data.filter(m => m.nama.toLowerCase().includes(q) || m.posisi.toLowerCase().includes(q));
+    renderMitraTable(filtered);
+  }
+
+  function renderHistory(logs) {
+    const list = document.getElementById('myHistoryList');
+    const empty = document.getElementById('emptyHistory');
+    if (!logs || logs.length === 0) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    const mitraLogs = logs.filter(log => log.kategori === 'Mitra Statistik' || log.posisiMitra !== 'Pegawai Organik');
+    const pegawaiLogs = logs.filter(log => log.kategori === 'Sesama Pegawai' || log.posisiMitra === 'Pegawai Organik');
+
+    let html = '';
+
+    if (mitraLogs.length > 0) {
+      html += `<div class="bg-slate-100 px-5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mitra Statistik</div>`;
+      html += mitraLogs.map(log => renderHistoryItem(log, 'text-blue-600', 'bg-blue-50')).join('');
+    }
+
+    if (pegawaiLogs.length > 0) {
+      html += `<div class="bg-slate-100 px-5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-t border-slate-200">Sesama Pegawai</div>`;
+      html += pegawaiLogs.map(log => renderHistoryItem(log, 'text-purple-600', 'bg-purple-50')).join('');
+    }
+
+    list.innerHTML = html;
+  }
+
+  function renderHistoryItem(log, badgeTextClass, badgeBgClass) {
+    return `
+      <div class="px-5 py-4 flex items-start justify-between space-x-3 bg-white border-b border-slate-100 last:border-b-0">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center space-x-2 mb-1">
+            <p class="text-sm font-semibold text-slate-900 truncate">${log.namaMitra}</p>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase ${badgeBgClass} ${badgeTextClass}">${log.posisiMitra === 'Pegawai Organik' ? 'Pegawai' : 'Mitra'}</span>
+          </div>
+          <p class="text-xs text-slate-600"><span class="font-medium text-slate-500">Hubungan:</span> ${log.hubungan}</p>
+          ${log.keterangan ? `<p class="text-xs text-slate-400 italic mt-0.5 truncate">"${log.keterangan}"</p>` : ''}
+          <p class="text-[10px] text-slate-400 mt-2 flex items-center">
+            <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            ${new Date(log.timestamp).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'})}
+          </p>
+        </div>
+        <div class="flex-shrink-0 flex space-x-1">
+          <button onclick='openEditModal(${JSON.stringify(log).replace(/'/g,"&#39;")})' title="Edit"
+            class="p-1.5 text-cyan-500 hover:bg-cyan-50 rounded-lg transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+          <button onclick="deleteReport(${log.id})" title="Hapus"
+            class="p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+
+  function confirmNoCoI() {
+    const tahun = document.getElementById('filterTahun').value;
+    const isPegawai = activeTab === 'pegawai';
+    const kategoriName = isPegawai ? 'Sesama Pegawai' : 'Mitra Statistik';
+    
+    if (confirm(`Konfirmasi: Anda menyatakan TIDAK memiliki potensi CoI dengan ${kategoriName} manapun untuk tahun ${tahun}. Lanjutkan?`)) {
+      google.script.run
+        .withSuccessHandler(() => { alert(`Deklarasi "Bebas CoI" untuk ${kategoriName} berhasil disimpan.`); fetchData(); })
+        .withFailureHandler(err => alert(err.message))
+        .reportNoCoI(tahun, isPegawai ? 'Pegawai Organik' : '-', currentUser);
+    }
+  }
+
+
+
+  function openEditModal(log) {
+    document.getElementById('editLogId').value = log.id;
+    document.getElementById('editMitraName').textContent = log.namaMitra;
+    document.getElementById('editHubungan').value = log.hubungan;
+    document.getElementById('editKeterangan').value = log.keterangan || '';
+    document.getElementById('editModal').classList.remove('hidden');
+  }
+
+  function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
+
+  function submitUpdate() {
+    const id = parseInt(document.getElementById('editLogId').value);
+    const hubungan = document.getElementById('editHubungan').value.trim();
+    if (!hubungan) { alert('Hubungan wajib diisi.'); return; }
+    google.script.run
+      .withSuccessHandler(() => { alert('Laporan diperbarui.'); closeEditModal(); fetchData(); })
+      .withFailureHandler(err => alert('Gagal: ' + err.message))
+      .updateCoILog(id, { hubungan, keterangan: document.getElementById('editKeterangan').value }, currentUser);
+  }
+
+
+  function deleteReport(id) {
+    if (!confirm('Hapus laporan ini?')) return;
+    google.script.run
+      .withSuccessHandler(() => { fetchData(); })
+      .withFailureHandler(err => alert('Gagal hapus: ' + err.message))
+      .deleteCoILog(id, currentUser);
+  }
+
+
+  function submitReport(event) {
+    event.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const tahun = document.getElementById('filterTahun').value;
+    const reports = [];
+
+    for (const id of selectedIds) {
+      const dataSet = activeTab === 'mitra' ? allMitra : allPegawai;
+      const m = dataSet.find(x => String(x.id) === String(id));
+      if (!m) continue;
+
+      const hubungan = document.getElementById('hub-' + id)?.value.trim();
+      if (!hubungan) { alert(`Isi kolom "Hubungan" untuk: ${m.nama}`); return; }
+      reports.push({ 
+        namaMitra: m.nama, 
+        posisiMitra: m.posisi, 
+        hubungan, 
+        keterangan: document.getElementById('ket-' + id)?.value.trim() || '' 
+      });
+    }
+
+    if (reports.length === 0) return;
+
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="animate-spin h-4 w-4 mr-2 text-white inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Menyimpan...`;
+
+    google.script.run
+      .withSuccessHandler(() => {
+        alert('Laporan berhasil disimpan!');
+        fetchData();
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Simpan Laporan';
+      })
+      .withFailureHandler(err => {
+        alert('Gagal: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = 'Simpan Laporan';
+      })
+      .saveCoILog({ tahun, reports }, currentUser);
+  }
+
+
+  loadPageData();
+</script>

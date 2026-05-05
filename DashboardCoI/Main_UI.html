@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <title><?= title ?></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <?!= include('Stylesheet_UI'); ?>
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Inter']">
+  <script>
+    const session = localStorage.getItem('coi_session');
+    if (!session) {
+      window.top.location.href = '<?= getScriptUrl() ?>?p=login';
+    }
+    const currentUser = session ? JSON.parse(session) : null;
+  </script>
+
+  <!-- Navbar -->
+  <nav class="text-white shadow-lg sticky top-0 z-50" style="background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 relative">
+        <!-- Left: Logo -->
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <span class="font-bold text-base tracking-tight leading-none block">PakCoi</span>
+              <!-- <span class="text-[10px] text-blue-100 leading-none">Pantau & Kelola Conflict of Interest</span> -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Navigation (Desktop) -->
+        <div class="hidden md:flex absolute inset-y-0 left-1/2 transform -translate-x-1/2 items-center space-x-2">
+          <a href="<?= getScriptUrl() ?>?p=dashboard" class="px-4 py-2 rounded-lg text-sm font-medium transition-all <?= page === 'dashboard' ? 'bg-white/20 text-white shadow-sm' : 'text-blue-100 hover:bg-white/10 hover:text-white' ?>">Dashboard</a>
+          <a href="<?= getScriptUrl() ?>?p=identifikasi" class="px-4 py-2 rounded-lg text-sm font-medium transition-all <?= page === 'identifikasi' ? 'bg-white/20 text-white shadow-sm' : 'text-blue-100 hover:bg-white/10 hover:text-white' ?>">Identifikasi</a>
+          <a href="<?= getScriptUrl() ?>?p=rekap" class="px-4 py-2 rounded-lg text-sm font-medium transition-all <?= page === 'rekap' ? 'bg-white/20 text-white shadow-sm' : 'text-blue-100 hover:bg-white/10 hover:text-white' ?>">Daftar Laporan</a>
+          <a href="<?= getScriptUrl() ?>?p=konflik" class="px-4 py-2 rounded-lg text-sm font-medium transition-all <?= page === 'konflik' ? 'bg-white/20 text-white shadow-sm' : 'text-blue-100 hover:bg-white/10 hover:text-white' ?>">Daftar CoI</a>
+        </div>
+
+        <!-- Right: User Info & Mobile Button -->
+        <div class="flex items-center justify-end">
+          <div class="hidden md:flex items-center space-x-3">
+            <div class="text-right">
+              <p class="text-[10px] text-blue-200">Login sebagai</p>
+              <p id="userNameDesktop" class="text-sm font-semibold leading-tight">Loading...</p>
+            </div>
+            <button onclick="logout()" title="Keluar" class="p-2 rounded-full hover:bg-white/10 text-blue-100 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+          <!-- Mobile menu button -->
+          <div class="md:hidden flex items-center ml-4">
+            <button type="button" onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-blue-100 hover:text-white hover:bg-white/10 focus:outline-none">
+              <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path id="mobile-menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden px-2 pt-2 pb-3 space-y-1 border-t border-white/10" style="background: rgba(37,99,235,0.95);">
+      <a href="<?= getScriptUrl() ?>?p=dashboard" class="block px-3 py-2 rounded-lg text-base font-medium <?= page === 'dashboard' ? 'bg-white/20' : 'hover:bg-white/10' ?>">Dashboard</a>
+      <a href="<?= getScriptUrl() ?>?p=identifikasi" class="block px-3 py-2 rounded-lg text-base font-medium <?= page === 'identifikasi' ? 'bg-white/20' : 'hover:bg-white/10' ?>">Identifikasi CoI</a>
+      <a href="<?= getScriptUrl() ?>?p=rekap" class="block px-3 py-2 rounded-lg text-base font-medium <?= page === 'rekap' ? 'bg-white/20' : 'hover:bg-white/10' ?>">Daftar Laporan</a>
+      <a href="<?= getScriptUrl() ?>?p=konflik" class="block px-3 py-2 rounded-lg text-base font-medium <?= page === 'konflik' ? 'bg-white/20' : 'hover:bg-white/10' ?>">Daftar CoI</a>
+
+      <div class="border-t border-white/10 mt-2 pt-2 flex justify-between items-center px-3">
+        <div>
+          <p class="text-xs text-blue-200">Login sebagai</p>
+          <p id="userNameMobile" class="text-sm font-semibold">Loading...</p>
+        </div>
+
+        <button onclick="logout()" class="text-blue-200 hover:text-white text-sm font-medium">Keluar</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-4 sm:px-0">
+      <? if (page === 'dashboard') { ?>
+        <?!= include('Dashboard_UI'); ?>
+      <? } else if (page === 'identifikasi') { ?>
+        <?!= include('IdentifikasiCoI_UI'); ?>
+      <? } else if (page === 'rekap') { ?>
+        <?!= include('DaftarCoI_UI'); ?>
+      <? } else if (page === 'konflik') { ?>
+        <?!= include('DaftarKonflik_UI'); ?>
+      <? } else if (page === 'organik') { ?>
+
+        <?!= include('Organik_UI'); ?>
+      <? } else if (page === 'mitra') { ?>
+        <?!= include('Mitra_UI'); ?>
+      <? } ?>
+    </div>
+  </main>
+
+  <script>
+    // Update nama user di UI
+    if (currentUser) {
+      document.getElementById('userNameDesktop').textContent = currentUser.nama;
+      document.getElementById('userNameMobile').textContent = currentUser.nama;
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    function logout() {
+      // Hapus sesi dari localStorage
+      localStorage.removeItem('coi_session');
+      // Panggil server (opsional, untuk konsistensi) lalu redirect
+      google.script.run
+        .withSuccessHandler(() => {
+          window.top.location.href = '<?= getScriptUrl() ?>?p=login';
+        })
+        .logout();
+    }
+  </script>
+
+</body>
+</html>

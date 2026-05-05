@@ -1,0 +1,84 @@
+<div class="fade-in">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+        Daftar Pegawai Organik
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Database pegawai BPS Kabupaten Kepahiang.
+      </p>
+    </div>
+  </div>
+
+  <section class="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+      <h3 class="text-lg font-semibold text-slate-900">Data Pegawai</h3>
+      <input type="text" id="searchOrganikList" onkeyup="filterOrganikList()" placeholder="Cari nama atau NIP..." 
+        class="block w-64 px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-cyan-500 focus:border-cyan-500">
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200" id="organikTable">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama Lengkap</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">NIP</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Username</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200" id="organikTableBody">
+          <!-- Rows loaded here -->
+        </tbody>
+      </table>
+    </div>
+    <div id="loadingOrganik" class="py-12 flex flex-col items-center justify-center space-y-4">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600"></div>
+      <p class="text-slate-500 text-sm">Memuat data pegawai...</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  let allOrganik = [];
+
+  function fetchOrganik() {
+    google.script.run
+      .withSuccessHandler((data) => {
+        allOrganik = data;
+        renderOrganikTable(data);
+        document.getElementById('loadingOrganik').classList.add('hidden');
+      })
+      .getOrganikEmployees();
+  }
+
+  function renderOrganikTable(data) {
+    const tbody = document.getElementById('organikTableBody');
+    tbody.innerHTML = data.map(o => `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-slate-900">${o.nama}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+          ${o.nip}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">
+          ${o.username}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+          ${o.email}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterOrganikList() {
+    const q = document.getElementById('searchOrganikList').value.toLowerCase();
+    const filtered = allOrganik.filter(o => 
+      o.nama.toLowerCase().includes(q) || 
+      o.nip.toString().includes(q)
+    );
+    renderOrganikTable(filtered);
+  }
+
+  fetchOrganik();
+</script>
